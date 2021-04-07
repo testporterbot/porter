@@ -48,7 +48,7 @@ func PrepareMixinForPublish(mixin string, version string, permalink string) {
 
 // Publish a mixin's binaries.
 func PublishMixin(mixin string, version string, permalink string) {
-	mg.Deps(EnsureGitHubClient, EnsureHubClient)
+	mg.Deps(EnsureGitHubClient)
 
 	repo := os.Getenv("PORTER_RELEASE_REPOSITORY")
 	if repo == "" {
@@ -57,8 +57,8 @@ func PublishMixin(mixin string, version string, permalink string) {
 	versionDir := filepath.Join("bin/mixins/", mixin, version)
 
 	// Move the permalink tag. The existing release automatically points to the tag.
-	must.RunV("hub", "tag", permalink, version+"^{}", "-f", "-am", "")
-	must.RunV("hub", "push", "-f", "origin", permalink)
+	must.RunV("git", "tag", permalink, version+"^{}", "-f", "-am", "")
+	must.RunV("git", "push", "-f", "origin", permalink)
 
 	// Create or update GitHub release for the permalink (canary/latest) with the version's binaries
 	AddFilesToRelease(repo, permalink, versionDir)
@@ -71,9 +71,6 @@ func PublishMixin(mixin string, version string, permalink string) {
 
 // Generate an updated mixin feed and publishes it.
 func PublishMixinFeed(mixin string, version string) {
-	// Using the hub client so that we can transparently authenticate with GITHUB_TOKEN
-	mg.Deps(EnsureHubClient)
-
 	// Clone the packages repository
 	if _, err := os.Stat(packagesRepo); !os.IsNotExist(err) {
 		os.RemoveAll(packagesRepo)
@@ -82,13 +79,13 @@ func PublishMixinFeed(mixin string, version string) {
 	if packagesOrigin == "" {
 		packagesOrigin = fmt.Sprintf("https://github.com:getporter/packages.git")
 	}
-	must.RunV("hub", "clone", "--depth=1", packagesOrigin, packagesRepo)
+	must.RunV("git", "clone", "--depth=1", packagesOrigin, packagesRepo)
 
 	GenerateMixinFeed()
 
-	must.Command("hub", "commit", "--signoff", "--author='Porter Bot<bot@porter.sh>'", "-am", fmt.Sprintf("Add %s@%s to mixin feed", mixin, version)).
+	must.Command("git", "commit", "--signoff", "--author='Porter Bot<bot@porter.sh>'", "-am", fmt.Sprintf("Add %s@%s to mixin feed", mixin, version)).
 		In(packagesRepo).RunV()
-	must.Command("hub", "push").In(packagesRepo).RunV()
+	must.Command("git", "push").In(packagesRepo).RunV()
 }
 
 // Generate a mixin feed from any mixin versions in bin/mixins.
@@ -121,36 +118,6 @@ func EnsureGitHubClient() {
 		ArchiveExtensions: map[string]string{
 			"linux":   ".tar.gz",
 			"darwin":  ".tar.gz",
-			"windows": ".zip",
-		},
-		TargetFileTemplate: target,
-	}
-
-	err := archive.DownloadToGopathBin(opts)
-	mgx.Must(err)
-}
-
-// Install the hub CLI
-func EnsureHubClient() {
-	if ok, _ := pkg.IsCommandAvailable("hub", ""); ok {
-		return
-	}
-
-	// gh cli unfortunately uses a different archive schema depending on the OS
-	target := "hub-{{.GOOS}}-{{.GOARCH}}-{{.VERSION}}/bin/hub{{.EXT}}"
-	if runtime.GOOS == "windows" {
-		target = "bin/hub.exe"
-	}
-
-	opts := archive.DownloadArchiveOptions{
-		DownloadOptions: downloads.DownloadOptions{
-			UrlTemplate: "https://github.com/github/hub/releases/download/v2.14.2/hub-{{.GOOS}}-{{.GOARCH}}-{{.VERSION}}{{.EXT}}",
-			Name:        "hub",
-			Version:     "2.14.2",
-		},
-		ArchiveExtensions: map[string]string{
-			"linux":   ".tgz",
-			"darwin":  ".tgz",
 			"windows": ".zip",
 		},
 		TargetFileTemplate: target,

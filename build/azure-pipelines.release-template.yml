@@ -147,6 +147,8 @@ stages:
             displayName: "Setup Bin"
           - script: |
               make publish-bin publish-mixins
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
             displayName: "Publish Porter Binaries"
 
       - job: publish_docker
