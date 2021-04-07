@@ -62,7 +62,8 @@ func configureGitBotIn(dir string) {
 
 // Publish a mixin's binaries.
 func PublishMixin(mixin string, version string, permalink string) {
-	mg.Deps(EnsureGitHubClient, ConfigureGitBot)
+	mg.Deps(EnsureGitHubClient)
+	ConfigureGitBot()
 
 	repo := os.Getenv("PORTER_RELEASE_REPOSITORY")
 	if repo == "" {
