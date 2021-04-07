@@ -46,9 +46,23 @@ func PrepareMixinForPublish(mixin string, version string, permalink string) {
 	mgx.Must(shx.Copy(versionDir, permalinkDir, shx.CopyRecursive))
 }
 
+// Use GITHUB_TOKEN to log the porter bot into git
+func ConfigureGitBot() {
+	configureGitBotIn(".")
+}
+
+func configureGitBotIn(dir string) {
+	pwd, _ := os.Getwd()
+	script := filepath.Join(pwd, "build/git_askpass.sh")
+	os.Setenv("GIT_ASKPASS", script)
+
+	must.Command("git", "config", "user.name", "Porter Bot").In(dir).RunV()
+	must.Command("git", "config", "user.email", "bot@porter.sh").In(dir).RunV()
+}
+
 // Publish a mixin's binaries.
 func PublishMixin(mixin string, version string, permalink string) {
-	mg.Deps(EnsureGitHubClient)
+	mg.Deps(EnsureGitHubClient, ConfigureGitBot)
 
 	repo := os.Getenv("PORTER_RELEASE_REPOSITORY")
 	if repo == "" {
@@ -80,6 +94,7 @@ func PublishMixinFeed(mixin string, version string) {
 		packagesOrigin = fmt.Sprintf("https://github.com:getporter/packages.git")
 	}
 	must.RunV("git", "clone", "--depth=1", packagesOrigin, packagesRepo)
+	configureGitBotIn(packagesRepo)
 
 	GenerateMixinFeed()
 

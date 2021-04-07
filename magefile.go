@@ -117,7 +117,7 @@ func TestE2E() error {
 
 // Publish the porter binaries and install scripts.
 func PublishPorter(version string, permalink string) {
-	mg.Deps(releases.EnsureGitHubClient)
+	mg.Deps(releases.EnsureGitHubClient, releases.ConfigureGitBot)
 
 	porterVersionDir := filepath.Join("bin", version)
 	execVersionDir := filepath.Join("bin/mixins/exec", version)
