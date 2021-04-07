@@ -18,6 +18,9 @@ parameters:
   - name: dualPublish # Publish to the registry parameter and to ghcr.io while we migrate to GHCR
     type: boolean
     default: true
+  - name: skipIntegrationTests
+    type: boolean
+    default: false
 
 stages:
   - stage: Validate
@@ -78,6 +81,7 @@ stages:
       - job: integration_test
         displayName: "Integration Test"
         dependsOn: build
+        condition: and(succeeded('build'), not(${{ parameters.skipIntegrationTests }}))
         pool:
           vmImage: ${{variables.vmImage}}
         steps:

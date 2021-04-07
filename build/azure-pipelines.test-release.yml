@@ -4,6 +4,7 @@ trigger: none
 extends:
   template: azure-pipelines.release-template.yml
   parameters:
+      skipIntegrationTests: true
       shouldPublish: true
       dualPublish: false
       registry: docker.io/getporterci
