@@ -57,7 +57,7 @@ func PublishMixin(mixin string, version string, permalink string) {
 	versionDir := filepath.Join("bin/mixins/", mixin, version)
 
 	// Move the permalink tag. The existing release automatically points to the tag.
-	must.RunV("git", "tag", permalink, version+"^{}", "-f", "-am", "")
+	must.RunV("git", "tag", permalink, version+"^{}", "-f")
 	must.RunV("git", "push", "-f", "origin", permalink)
 
 	// Create or update GitHub release for the permalink (canary/latest) with the version's binaries

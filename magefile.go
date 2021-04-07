@@ -130,7 +130,7 @@ func PublishPorter(version string, permalink string) {
 	must.Command("./scripts/prep-install-scripts.sh").Env("VERSION="+version, "PERMALINK="+permalink).RunV()
 
 	// Move the permalink tag. The existing release automatically points to the tag.
-	must.RunV("git", "tag", permalink, version+"^{}", "-f", "-am", "")
+	must.RunV("git", "tag", permalink, version+"^{}", "-f")
 	must.RunV("git", "push", "-f", "origin", permalink)
 
 	// Create or update GitHub release for the permalink (canary/latest) with the version's assets (porter binaries, exec binaries and install scripts)
