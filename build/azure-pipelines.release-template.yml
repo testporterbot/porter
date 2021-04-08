@@ -21,6 +21,9 @@ parameters:
   - name: skipTests
     type: boolean
     default: false
+  - name: publishExamples
+    type: boolean
+    default: true
 
 stages:
   - stage: Validate
@@ -194,6 +197,7 @@ stages:
 
       - job: publish_example_bundles
         displayName: "Publish Example Bundles"
+        condition: and(succeeded(), ${{ parameters.publishExamples }})
         pool:
           vmImage: ${{variables.vmImage}}
         steps:

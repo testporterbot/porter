@@ -8,3 +8,4 @@ extends:
       shouldPublish: true
       dualPublish: false
       registry: docker.io/getporterci
+      publishExamples: false
