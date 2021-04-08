@@ -117,8 +117,7 @@ func TestE2E() error {
 
 // Publish the porter binaries and install scripts.
 func PublishPorter(version string, permalink string) {
-	mg.Deps(releases.EnsureGitHubClient)
-	releases.ConfigureGitBot()
+	mg.Deps(releases.EnsureGitHubClient, releases.ConfigureGitBot)
 
 	porterVersionDir := filepath.Join("bin", version)
 	execVersionDir := filepath.Join("bin/mixins/exec", version)
@@ -126,13 +125,14 @@ func PublishPorter(version string, permalink string) {
 	if repo == "" {
 		repo = "github.com/getporter/porter"
 	}
+	remote := fmt.Sprintf("https://%s.git", repo)
 
 	// Copy install scripts into version directory
 	must.Command("./scripts/prep-install-scripts.sh").Env("VERSION="+version, "PERMALINK="+permalink).RunV()
 
 	// Move the permalink tag. The existing release automatically points to the tag.
 	must.RunV("git", "tag", permalink, version+"^{}", "-f")
-	must.RunV("git", "push", "-f", "origin", permalink)
+	must.RunV("git", "push", "-f", remote, permalink)
 
 	// Create or update GitHub release for the permalink (canary/latest) with the version's assets (porter binaries, exec binaries and install scripts)
 	releases.AddFilesToRelease(repo, permalink, porterVersionDir)

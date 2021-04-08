@@ -54,26 +54,26 @@ func ConfigureGitBot() {
 func configureGitBotIn(dir string) {
 	pwd, _ := os.Getwd()
 	script := filepath.Join(pwd, "build/git_askpass.sh")
-	os.Setenv("GIT_ASKPASS", script)
 
 	must.Command("git", "config", "user.name", "Porter Bot").In(dir).RunV()
 	must.Command("git", "config", "user.email", "bot@porter.sh").In(dir).RunV()
+	must.Command("git", "config", "core.askPass", script).In(dir).RunV()
 }
 
 // Publish a mixin's binaries.
 func PublishMixin(mixin string, version string, permalink string) {
-	mg.Deps(EnsureGitHubClient)
-	ConfigureGitBot()
+	mg.Deps(EnsureGitHubClient, ConfigureGitBot)
 
 	repo := os.Getenv("PORTER_RELEASE_REPOSITORY")
 	if repo == "" {
 		fmt.Sprintf("github.com/getporter/%s-mixin", mixin)
 	}
+	remote := fmt.Sprintf("https://%s.git", repo)
 	versionDir := filepath.Join("bin/mixins/", mixin, version)
 
 	// Move the permalink tag. The existing release automatically points to the tag.
 	must.RunV("git", "tag", permalink, version+"^{}", "-f")
-	must.RunV("git", "push", "-f", "origin", permalink)
+	must.RunV("git", "push", "-f", remote, permalink)
 
 	// Create or update GitHub release for the permalink (canary/latest) with the version's binaries
 	AddFilesToRelease(repo, permalink, versionDir)
