@@ -106,7 +106,7 @@ stages:
       - job: e2e_test
         displayName: "Run E2E tests on"
         dependsOn: xbuild
-        condition: and(succeeded('xbuild'), not(${{ parameters.skipTests }}))
+        condition: and(succeeded(), not(${{ parameters.skipTests }}))
         strategy:
           matrix:
             windows:
@@ -136,7 +136,7 @@ stages:
 
   - stage: Publish
     dependsOn: Validate
-    condition: and(succeeded('Validate'), ${{ parameters.shouldPublish }})
+    condition: and(succeeded(), ${{ parameters.shouldPublish }})
     jobs:
       - job: publish_binaries
         displayName: "Publish Binaries"
