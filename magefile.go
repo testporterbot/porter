@@ -119,6 +119,9 @@ func TestE2E() error {
 func PublishPorter(version string, permalink string) {
 	mg.Deps(releases.EnsureGitHubClient, releases.ConfigureGitBot)
 
+	// Copy install scripts into version directory
+	must.Command("./scripts/prep-install-scripts.sh").Env("VERSION="+version, "PERMALINK="+permalink).RunV()
+
 	porterVersionDir := filepath.Join("bin", version)
 	execVersionDir := filepath.Join("bin/mixins/exec", version)
 	var repo = os.Getenv("PORTER_RELEASE_REPOSITORY")
@@ -126,9 +129,6 @@ func PublishPorter(version string, permalink string) {
 		repo = "github.com/getporter/porter"
 	}
 	remote := fmt.Sprintf("https://%s.git", repo)
-
-	// Copy install scripts into version directory
-	must.Command("./scripts/prep-install-scripts.sh").Env("VERSION="+version, "PERMALINK="+permalink).RunV()
 
 	// Move the permalink tag. The existing release automatically points to the tag.
 	must.RunV("git", "tag", permalink, version+"^{}", "-f")

@@ -90,11 +90,11 @@ func PublishMixinFeed(mixin string, version string) {
 	if _, err := os.Stat(packagesRepo); !os.IsNotExist(err) {
 		os.RemoveAll(packagesRepo)
 	}
-	packagesOrigin := os.Getenv("PORTER_PACKAGES_ORIGIN")
-	if packagesOrigin == "" {
-		packagesOrigin = fmt.Sprintf("https://github.com:getporter/packages.git")
+	remote := os.Getenv("PORTER_PACKAGES_REMOTE")
+	if remote == "" {
+		remote = fmt.Sprintf("https://github.com/getporter/packages.git")
 	}
-	must.RunV("git", "clone", "--depth=1", packagesOrigin, packagesRepo)
+	must.RunV("git", "clone", "--depth=1", remote, packagesRepo)
 	configureGitBotIn(packagesRepo)
 
 	GenerateMixinFeed()
