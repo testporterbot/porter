@@ -25,10 +25,9 @@ parameters:
     default: "1.18"
   - name: registry
     type: string
-    default: ghcr.io/getporter/test
+    default: ghcr.io/testporterbot
     values:
-      - ghcr.io/getporter
-      - ghcr.io/getporter/test
+      - ghcr.io/testporterbot
   - name: shouldPublish
     type: boolean
     default: false
@@ -190,7 +189,7 @@ stages:
             displayName: Docker Login
             inputs:
               command: login
-              containerRegistry: ghcr.io/getporter
+              containerRegistry: ghcr.io/testporterbot
           - script: go run mage.go ConfigureAgent SetBinExecutable
             displayName: "Configure Agent"
           - script: mage -v TestIntegration

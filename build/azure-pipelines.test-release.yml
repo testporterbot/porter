@@ -14,4 +14,4 @@ extends:
   parameters:
       skipTests: ${{ parameters.skipTests }}
       shouldPublish: ${{ parameters.shouldPublish }}
-      registry: ghcr.io/getporter/test
+      registry: ghcr.io/testporterbot

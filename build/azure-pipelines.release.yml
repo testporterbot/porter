@@ -16,4 +16,4 @@ extends:
   parameters:
     skipTests: true
     shouldPublish: true
-    registry: ghcr.io/getporter
+    registry: ghcr.io/testporterbot
